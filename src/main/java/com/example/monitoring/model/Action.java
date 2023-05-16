@@ -17,7 +17,7 @@ public class Action {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer action_id;
 
-    @Column(name = "date_begin", nullable = false)
+    @Column(name = "date_begin")
     @DateTimeFormat(pattern = "dd.MM.yyyy")
     @JsonFormat(pattern = "dd.MM.yyyy", shape = JsonFormat.Shape.STRING)
     private Date date_begin;

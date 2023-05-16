@@ -65,6 +65,7 @@ public class ActionController {
 
         if (well_equipment_id == null && action_type_id == null && action_state_id == null) {
             actions.addAll(actionRepository.findAll());
+            return new ResponseEntity<>(actions, HttpStatus.OK);
         }
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
