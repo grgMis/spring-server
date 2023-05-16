@@ -8,7 +8,7 @@ public class ActionState {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer action_state;
+    private Integer action_state_id;
 
     @Column(name = "action_state_name", nullable = false, length = 20)
     private String action_state_name;
@@ -20,12 +20,12 @@ public class ActionState {
         this.action_state_name = action_state_name;
     }
 
-    public Integer getAction_state() {
-        return action_state;
+    public Integer getAction_state_id() {
+        return action_state_id;
     }
 
-    public void setAction_state(Integer action_state) {
-        this.action_state = action_state;
+    public void setAction_state_id(Integer action_state_id) {
+        this.action_state_id = action_state_id;
     }
 
     public String getAction_state_name() {

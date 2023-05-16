@@ -83,8 +83,6 @@ public class ActionController {
                                                @RequestParam Integer action_state_id,
                                                @RequestBody(required = false) Action action) throws Exception {
 
-        Date date = new Date();
-
         Action entity = new Action();
 
         WellEquipment wellEquipment = wellEquipmentRepository.findById(well_equipment_id)
@@ -99,10 +97,11 @@ public class ActionController {
         entity.setWellEquipment(wellEquipment);
         entity.setActionType(actionType);
         entity.setActionState(actionState);
-        entity.setDate_begin(date);
 
         if (action != null) {
+            entity.setDate_begin(action.getDate_begin());
             entity.setDate_end(action.getDate_end());
+            entity.setAction_note(action.getAction_note());
         }
 
         actionRepository.save(entity);
@@ -116,7 +115,6 @@ public class ActionController {
                                                @RequestParam(required = false) Integer action_type_id,
                                                @RequestParam(required = false) Integer action_state_id,
                                                @RequestBody(required = false) Action action) throws Exception {
-        Date date = new Date();
 
         WellEquipment wellEquipment;
         ActionType actionType;
@@ -144,7 +142,9 @@ public class ActionController {
         }
 
         if (action != null) {
-            entity.setDate_end(date);
+            entity.setDate_begin(action.getDate_begin());
+            entity.setDate_end(action.getDate_end());
+            entity.setAction_note(action.getAction_note());
         }
 
         actionRepository.save(entity);

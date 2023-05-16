@@ -26,9 +26,9 @@ public class WellEquipment {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Well well;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @OneToOne(fetch = FetchType.EAGER, optional = false)
+    @MapsId
     @JoinColumn(name = "equipment_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private Equipment equipment;
 
     public WellEquipment() {

@@ -2,6 +2,7 @@ package com.example.monitoring.controller;
 
 import com.example.monitoring.model.ActionGroup;
 import com.example.monitoring.repository.ActionGroupRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import java.util.List;
 @RequestMapping("/api")
 public class ActionGroupController {
 
+    @Autowired
     private ActionGroupRepository actionGroupRepository;
 
     @GetMapping("/action-group")

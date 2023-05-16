@@ -27,6 +27,9 @@ public class Action {
     @JsonFormat(pattern = "dd.MM.yyyy", shape = JsonFormat.Shape.STRING)
     private Date date_end;
 
+    @Column(name = "action_note", length = 300)
+    private String action_note;
+
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "well_equipment_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -67,6 +70,14 @@ public class Action {
 
     public void setDate_end(Date date_end) {
         this.date_end = date_end;
+    }
+
+    public String getAction_note() {
+        return action_note;
+    }
+
+    public void setAction_note(String action_note) {
+        this.action_note = action_note;
     }
 
     public WellEquipment getWellEquipment() {
