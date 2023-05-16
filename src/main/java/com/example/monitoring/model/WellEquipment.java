@@ -27,7 +27,6 @@ public class WellEquipment {
     private Well well;
 
     @OneToOne(fetch = FetchType.EAGER, optional = false)
-    @MapsId
     @JoinColumn(name = "equipment_id", nullable = false)
     private Equipment equipment;
 

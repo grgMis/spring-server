@@ -97,7 +97,7 @@ public class WellController {
     public ResponseEntity<Well> updateWell(@PathVariable("well_id") Integer well_id,
                                            @RequestParam(required = false) Integer dept_id,
                                            @RequestParam(required = false) Integer well_state_id,
-                                           @RequestBody Well well) throws Exception {
+                                           @RequestBody(required = false) Well well) throws Exception {
         Date date = new Date();
 
         Dept dept;
@@ -118,8 +118,10 @@ public class WellController {
             entity.setWellState(wellState);
         }
 
-        entity.setWell_name(well.getWell_name());
-        entity.setDate_entry(date);
+        if (well != null) {
+            entity.setWell_name(well.getWell_name());
+            entity.setDate_entry(date);
+        }
 
         wellRepository.save(entity);
 

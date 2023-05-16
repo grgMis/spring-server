@@ -93,7 +93,7 @@ public class EquipmentController {
     public ResponseEntity<Equipment> updateEquipment(@PathVariable("equipment_id") Integer equipment_id,
                                                      @RequestParam(required = false) Integer equipment_model_id,
                                                      @RequestParam(required = false) Integer equipment_state_id,
-                                                     @RequestBody Equipment equipment) throws Exception {
+                                                     @RequestBody(required = false) Equipment equipment) throws Exception {
         Date date = new Date();
 
         EquipmentModel equipmentModel;
@@ -114,9 +114,11 @@ public class EquipmentController {
             entity.setEquipmentState(equipmentState);
         }
 
-        entity.setFactory_number(equipment.getFactory_number());
-        entity.setInventory_number(equipment.getInventory_number());
-        entity.setDate_entry(date);
+        if (equipment != null) {
+            entity.setFactory_number(equipment.getFactory_number());
+            entity.setInventory_number(equipment.getInventory_number());
+            entity.setDate_entry(date);
+        }
 
         equipmentRepository.save(entity);
 
