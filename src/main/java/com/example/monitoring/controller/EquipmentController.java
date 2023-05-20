@@ -94,7 +94,6 @@ public class EquipmentController {
                                                      @RequestParam(required = false) Integer equipment_model_id,
                                                      @RequestParam(required = false) Integer equipment_state_id,
                                                      @RequestBody(required = false) Equipment equipment) throws Exception {
-        Date date = new Date();
 
         EquipmentModel equipmentModel;
         EquipmentState equipmentState;
@@ -117,7 +116,6 @@ public class EquipmentController {
         if (equipment != null) {
             entity.setFactory_number(equipment.getFactory_number());
             entity.setInventory_number(equipment.getInventory_number());
-            entity.setDate_entry(date);
         }
 
         equipmentRepository.save(entity);
