@@ -4,13 +4,14 @@ import com.example.monitoring.model.*;
 import com.example.monitoring.repository.ActionRepository;
 import com.example.monitoring.repository.ActionStateRepository;
 import com.example.monitoring.repository.ActionTypeRepository;
-import com.example.monitoring.repository.WellEquipmentRepository;
+import com.example.monitoring.repository.WellRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:8080")
@@ -22,7 +23,7 @@ public class ActionController {
     private ActionRepository actionRepository;
 
     @Autowired
-    private WellEquipmentRepository wellEquipmentRepository;
+    private WellRepository wellRepository;
 
     @Autowired
     private ActionTypeRepository actionTypeRepository;
@@ -31,20 +32,20 @@ public class ActionController {
     private ActionStateRepository actionStateRepository;
 
     @GetMapping("/action")
-    public ResponseEntity<List<Action>> getActionList(@RequestParam(required = false) Integer well_equipment_id,
+    public ResponseEntity<List<Action>> getActionList(@RequestParam(required = false) Integer well_id,
                                                       @RequestParam(required = false) Integer action_type_id,
                                                       @RequestParam(required = false) Integer action_state_id) throws Exception {
 
         List<Action> actions = new ArrayList<>();
 
-        WellEquipment wellEquipment;
+        Well well;
         ActionType actionType;
         ActionState actionState;
 
-        if (well_equipment_id != null) {
-            wellEquipment = wellEquipmentRepository.findById(well_equipment_id)
-                    .orElseThrow(() -> new Exception("Not found [well_equipment] with id = " + well_equipment_id));
-            actions.addAll(actionRepository.findByWellEquipment(wellEquipment));
+        if (well_id != null) {
+            well = wellRepository.findById(well_id)
+                    .orElseThrow(() -> new Exception("Not found [well] with id = " + well_id));
+            actions.addAll(actionRepository.findByWell(well));
             return new ResponseEntity<>(actions, HttpStatus.OK);
         }
 
@@ -62,7 +63,7 @@ public class ActionController {
             return new ResponseEntity<>(actions, HttpStatus.OK);
         }
 
-        if (well_equipment_id == null && action_type_id == null && action_state_id == null) {
+        if (well_id == null && action_type_id == null && action_state_id == null) {
             actions.addAll(actionRepository.findAll());
             return new ResponseEntity<>(actions, HttpStatus.OK);
         }
@@ -78,15 +79,16 @@ public class ActionController {
     }
 
     @PostMapping("/action")
-    public ResponseEntity<Action> createAction(@RequestParam Integer well_equipment_id,
+    public ResponseEntity<Action> createAction(@RequestParam Integer well_id,
                                                @RequestParam Integer action_type_id,
                                                @RequestParam Integer action_state_id,
                                                @RequestBody(required = false) Action action) throws Exception {
 
+        Date date = new Date();
         Action entity = new Action();
 
-        WellEquipment wellEquipment = wellEquipmentRepository.findById(well_equipment_id)
-                .orElseThrow(() -> new Exception("Not found [well_equipment] with id = " + well_equipment_id));
+        Well well = wellRepository.findById(well_id)
+                .orElseThrow(() -> new Exception("Not found [well] with id = " + well_id));
 
         ActionType actionType = actionTypeRepository.findById(action_type_id)
                 .orElseThrow(() -> new Exception("Not found [action_type] with id = " + action_type_id));
@@ -94,11 +96,12 @@ public class ActionController {
         ActionState actionState = actionStateRepository.findById(action_state_id)
                 .orElseThrow(() -> new Exception("Not found [action_state] with id = " + action_state_id));
 
-        entity.setWellEquipment(wellEquipment);
+        entity.setWell(well);
         entity.setActionType(actionType);
         entity.setActionState(actionState);
 
         if (action != null) {
+            entity.setDate_entry(date);
             entity.setDate_begin(action.getDate_begin());
             entity.setDate_end(action.getDate_end());
             entity.setAction_note(action.getAction_note());
@@ -111,22 +114,22 @@ public class ActionController {
 
     @PutMapping("/action/{action_id}")
     public ResponseEntity<Action> updateAction(@PathVariable("action_id") Integer action_id,
-                                               @RequestParam(required = false) Integer well_equipment_id,
+                                               @RequestParam(required = false) Integer well_id,
                                                @RequestParam(required = false) Integer action_type_id,
                                                @RequestParam(required = false) Integer action_state_id,
                                                @RequestBody(required = false) Action action) throws Exception {
 
-        WellEquipment wellEquipment;
+        Well well;
         ActionType actionType;
         ActionState actionState;
 
         Action entity = actionRepository.findById(action_id)
                 .orElseThrow(() -> new Exception("Not found [action] with id = " + action_id));
 
-        if (well_equipment_id != null) {
-            wellEquipment = wellEquipmentRepository.findById(well_equipment_id)
-                    .orElseThrow(() -> new Exception("Not found [well_equipment] with id = " + well_equipment_id));
-            entity.setWellEquipment(wellEquipment);
+        if (well_id != null) {
+            well = wellRepository.findById(well_id)
+                    .orElseThrow(() -> new Exception("Not found [well] with id = " + well_id));
+            entity.setWell(well);
         }
 
         if (action_type_id != null) {

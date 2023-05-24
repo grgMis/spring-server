@@ -27,7 +27,7 @@ public class Well {
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "dept_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Dept dept;
+    private Company company;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "well_state_id", nullable = false)
@@ -61,12 +61,12 @@ public class Well {
         this.date_entry = date;
     }
 
-    public Dept getDept() {
-        return dept;
+    public Company getCompany() {
+        return company;
     }
 
-    public void setDept(Dept dept) {
-        this.dept = dept;
+    public void setCompany(Company company) {
+        this.company = company;
     }
 
     public WellState getWellState() {

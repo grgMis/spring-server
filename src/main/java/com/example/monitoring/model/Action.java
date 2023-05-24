@@ -17,6 +17,11 @@ public class Action {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer action_id;
 
+    @Column(name = "date_entry")
+    @DateTimeFormat(pattern = "dd.MM.yyy")
+    @JsonFormat(pattern = "dd.MM.yyyy", shape = JsonFormat.Shape.STRING)
+    private Date date_entry;
+
     @Column(name = "date_begin")
     @DateTimeFormat(pattern = "dd.MM.yyyy")
     @JsonFormat(pattern = "dd.MM.yyyy", shape = JsonFormat.Shape.STRING)
@@ -31,9 +36,9 @@ public class Action {
     private String action_note;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "well_equipment_id", nullable = false)
+    @JoinColumn(name = "well_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private WellEquipment wellEquipment;
+    private Well well;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "action_type_id", nullable = false)
@@ -54,6 +59,14 @@ public class Action {
 
     public void setAction_id(Integer action_id) {
         this.action_id = action_id;
+    }
+
+    public Date getDate_entry() {
+        return date_entry;
+    }
+
+    public void setDate_entry(Date date_entry) {
+        this.date_entry = date_entry;
     }
 
     public Date getDate_begin() {
@@ -80,12 +93,12 @@ public class Action {
         this.action_note = action_note;
     }
 
-    public WellEquipment getWellEquipment() {
-        return wellEquipment;
+    public Well getWell() {
+        return well;
     }
 
-    public void setWellEquipment(WellEquipment wellEquipment) {
-        this.wellEquipment = wellEquipment;
+    public void setWell(Well well) {
+        this.well = well;
     }
 
     public ActionType getActionType() {

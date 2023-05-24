@@ -9,15 +9,15 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
 
 @Entity
-@Table(name = "dept")
-public class Dept {
+@Table(name = "company")
+public class Company {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer dept_id;
+    private Integer company_id;
 
-    @Column(name = "dept_name", length = 40)
-    private String dept_name;
+    @Column(name = "company_name", length = 40)
+    private String company_name;
 
     @Column(name = "date_entry", nullable = false)
     @DateTimeFormat(pattern = "dd/MM/yyyy")
@@ -25,48 +25,35 @@ public class Dept {
     private Date date_entry;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "dept_type_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private DeptType deptType;
-
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "field_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Field field;
 
-    public Dept() {
+    public Company() {
     }
 
-    public Integer getDept_id() {
-        return dept_id;
+    public Integer getCompany_id() {
+        return company_id;
     }
 
-    public void setDept_id(Integer dept_id) {
-        this.dept_id = dept_id;
+    public void setCompany_id(Integer company_id) {
+        this.company_id = company_id;
     }
 
-    public String getDept_name() {
-        return dept_name;
+    public String getCompany_name() {
+        return company_name;
     }
 
-    public void setDept_name(String dept_name) {
-        this.dept_name = dept_name;
+    public void setCompany_name(String company_name) {
+        this.company_name = company_name;
     }
 
     public Date getDate_entry() {
         return date_entry;
     }
 
-    public void setDate_entry(Date date) {
-        this.date_entry = date;
-    }
-
-    public DeptType getDeptType() {
-        return deptType;
-    }
-
-    public void setDeptType(DeptType deptType) {
-        this.deptType = deptType;
+    public void setDate_entry(Date date_entry) {
+        this.date_entry = date_entry;
     }
 
     public Field getField() {

@@ -65,6 +65,8 @@ public class EquipmentModelController {
             return equipmentModelRepository.save(equipmentModel);
         }).orElseThrow(() -> new Exception("Not found [equipment_class] with id = " + equipment_class_id));
 
+
+
         return new ResponseEntity<>(entity, HttpStatus.CREATED);
     }
 
@@ -84,7 +86,6 @@ public class EquipmentModelController {
             entity.setEquipmentClass(equipmentClass);
         }
         entity.setEquipment_model_name(equipmentModel.getEquipment_model_name());
-        entity.setEquipment_model_sysname(equipmentModel.getEquipment_model_sysname());
 
         return new ResponseEntity<>(equipmentModelRepository.save(entity), HttpStatus.OK);
     }

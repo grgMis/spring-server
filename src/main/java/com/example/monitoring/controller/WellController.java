@@ -1,7 +1,7 @@
 package com.example.monitoring.controller;
 
 import com.example.monitoring.model.*;
-import com.example.monitoring.repository.DeptRepository;
+import com.example.monitoring.repository.CompanyRepository;
 import com.example.monitoring.repository.WellRepository;
 import com.example.monitoring.repository.WellStateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,19 +22,19 @@ public class WellController {
     private WellRepository wellRepository;
 
     @Autowired
-    private DeptRepository deptRepository;
+    private CompanyRepository companyRepository;
 
     @Autowired
     private WellStateRepository wellStateRepository;
 
     @GetMapping("/well")
     public ResponseEntity<List<Well>> getListWell(@RequestParam(required = false) String well_name,
-                                                  @RequestParam(required = false) Integer dept_id,
+                                                  @RequestParam(required = false) Integer company_id,
                                                   @RequestParam(required = false) Integer well_state_id) throws Exception {
 
         List<Well> wells = new ArrayList<>();
 
-        Dept dept;
+        Company company;
         WellState wellState;
 
         if (well_name != null) {
@@ -42,10 +42,10 @@ public class WellController {
             return new ResponseEntity<>(wells, HttpStatus.OK);
         }
 
-        if (dept_id != null) {
-            dept = deptRepository.findById(dept_id)
-                    .orElseThrow(() -> new Exception("Not found [dept] with id = " + dept_id));
-            wells.addAll(wellRepository.findByDept(dept));
+        if (company_id != null) {
+            company = companyRepository.findById(company_id)
+                    .orElseThrow(() -> new Exception("Not found [company] with id = " + company_id));
+            wells.addAll(wellRepository.findByCompany(company));
             return new ResponseEntity<>(wells, HttpStatus.OK);
         }
 
@@ -56,7 +56,7 @@ public class WellController {
             return new ResponseEntity<>(wells, HttpStatus.OK);
         }
 
-        if (well_name == null && dept_id == null && well_state_id == null) {
+        if (well_name == null && company_id == null && well_state_id == null) {
             wells.addAll(wellRepository.findAll());
             return new ResponseEntity<>(wells, HttpStatus.OK);
         }
@@ -72,19 +72,19 @@ public class WellController {
     }
 
     @PostMapping("/well")
-    public ResponseEntity<Well> createWell(@RequestParam Integer dept_id,
+    public ResponseEntity<Well> createWell(@RequestParam Integer company_id,
                                            @RequestParam Integer well_state_id,
                                            @RequestBody Well well) throws Exception {
 
         Date date = new Date();
 
-        Dept dept = deptRepository.findById(dept_id)
-                .orElseThrow(() -> new Exception("Not found [dept] with id = " + dept_id));
+        Company company = companyRepository.findById(company_id)
+                .orElseThrow(() -> new Exception("Not found [company] with id = " + company_id));
 
         WellState wellState = wellStateRepository.findById(well_state_id)
                 .orElseThrow(() -> new Exception("Not found [well_state] with id = " + well_state_id));
 
-        well.setDept(dept);
+        well.setCompany(company);
         well.setWellState((wellState));
         well.setDate_entry(date);
 
@@ -95,21 +95,21 @@ public class WellController {
 
     @PutMapping("/well/{well_id}")
     public ResponseEntity<Well> updateWell(@PathVariable("well_id") Integer well_id,
-                                           @RequestParam(required = false) Integer dept_id,
+                                           @RequestParam(required = false) Integer company_id,
                                            @RequestParam(required = false) Integer well_state_id,
                                            @RequestBody(required = false) Well well) throws Exception {
         Date date = new Date();
 
-        Dept dept;
+        Company company;
         WellState wellState;
 
         Well entity = wellRepository.findById(well_id)
                 .orElseThrow(() -> new Exception("Not found [well] with id = " + well_id));
 
-        if (dept_id != null) {
-            dept = deptRepository.findById(dept_id)
-                    .orElseThrow(() -> new Exception("Not found [dept] with id = " + dept_id));
-            entity.setDept(dept);
+        if (company_id != null) {
+            company = companyRepository.findById(company_id)
+                    .orElseThrow(() -> new Exception("Not found [company] with id = " + company_id));
+            entity.setCompany(company);
         }
 
         if (well_state_id != null) {

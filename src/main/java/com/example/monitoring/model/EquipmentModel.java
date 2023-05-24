@@ -15,9 +15,6 @@ public class EquipmentModel {
     @Column(name = "equipment_model_name", nullable = false, length = 40)
     private String equipment_model_name;
 
-    @Column(name = "equipment_model_sysname", length = 20)
-    private String equipment_model_sysname;
-
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "equipment_class_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -50,11 +47,4 @@ public class EquipmentModel {
         this.equipment_model_name = equipment_model_name;
     }
 
-    public String getEquipment_model_sysname() {
-        return equipment_model_sysname;
-    }
-
-    public void setEquipment_model_sysname(String equipment_model_sysname) {
-        this.equipment_model_sysname = equipment_model_sysname;
-    }
 }
