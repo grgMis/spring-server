@@ -25,21 +25,16 @@ public class ActionCompositionController {
     private EquipmentRepository equipmentRepository;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private ActionCompositionStateRepository actionCompositionStateRepository;
 
     @GetMapping("/action-composition")
     public ResponseEntity<List<ActionComposition>> getListActionComposition(@RequestParam(required = false) Integer action_id,
                                                                             @RequestParam(required = false) Integer equipment_id,
-                                                                            @RequestParam(required = false) Integer user_id,
                                                                             @RequestParam(required = false) Integer action_composition_state_id) throws Exception {
         List<ActionComposition> actionCompositions = new ArrayList<>();
 
         Action action;
         Equipment equipment;
-        User user;
         ActionCompositionState actionCompositionState;
 
         if (action_id != null) {
@@ -53,13 +48,6 @@ public class ActionCompositionController {
             equipment = equipmentRepository.findById(equipment_id)
                     .orElseThrow(() -> new Exception("Not found [equipment] with id = " + equipment_id));
             actionCompositions.addAll(actionCompositionRepository.findByEquipment(equipment));
-            return new ResponseEntity<>(actionCompositions, HttpStatus.OK);
-        }
-
-        if (user_id != null) {
-            user = userRepository.findById(user_id)
-                    .orElseThrow(() -> new Exception("Not found [user] with id = " + user_id));
-            actionCompositions.addAll(actionCompositionRepository.findByUser(user));
             return new ResponseEntity<>(actionCompositions, HttpStatus.OK);
         }
 
@@ -88,7 +76,6 @@ public class ActionCompositionController {
     @PostMapping("/action-composition")
     public ResponseEntity<ActionComposition> createActionComposition(@RequestParam Integer action_id,
                                                                      @RequestParam Integer equipment_id,
-                                                                     @RequestParam Integer user_id,
                                                                      @RequestParam Integer action_composition_state_id,
                                                                      @RequestBody(required = false) ActionComposition actionComposition) throws Exception {
 
@@ -100,15 +87,11 @@ public class ActionCompositionController {
         Equipment equipment = equipmentRepository.findById(equipment_id)
                 .orElseThrow(() -> new Exception("Not found [equipment] with id = " + equipment_id));
 
-        User user = userRepository.findById(user_id)
-                .orElseThrow(() -> new Exception("Not found [user_id] with id = " + user_id));
-
         ActionCompositionState actionCompositionState = actionCompositionStateRepository.findById(action_composition_state_id)
                 .orElseThrow(() -> new Exception("Not found [action_composition_state] with id = " + action_composition_state_id));
 
         entity.setAction(action);
         entity.setEquipment(equipment);
-        entity.setUser(user);
         entity.setActionCompositionState(actionCompositionState);
 
         if (actionComposition != null) {
@@ -125,13 +108,11 @@ public class ActionCompositionController {
     public ResponseEntity<ActionComposition> updateActionComposition(@PathVariable("action_composition_id") Integer action_composition_id,
                                                                      @RequestParam(required = false) Integer action_id,
                                                                      @RequestParam(required = false) Integer equipment_id,
-                                                                     @RequestParam(required = false) Integer user_id,
                                                                      @RequestParam(required = false) Integer action_composition_state_id,
                                                                      @RequestBody(required = false) ActionComposition actionComposition) throws Exception {
 
         Action action;
         Equipment equipment;
-        User user;
         ActionCompositionState actionCompositionState;
 
         ActionComposition entity = actionCompositionRepository.findById(action_composition_id)
@@ -147,12 +128,6 @@ public class ActionCompositionController {
             equipment = equipmentRepository.findById(equipment_id)
                     .orElseThrow(() -> new Exception("Not found [equipment] with id = " + equipment_id));
             entity.setEquipment(equipment);
-        }
-
-        if (user_id != null) {
-            user = userRepository.findById(user_id)
-                    .orElseThrow(() -> new Exception("Not found [user_id] with id = " + user_id));
-            entity.setUser(user);
         }
 
         if (action_composition_state_id != null) {

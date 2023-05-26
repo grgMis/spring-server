@@ -1,9 +1,7 @@
 package com.example.monitoring.controller;
 
-import com.example.monitoring.model.EquipmentCategory;
-import com.example.monitoring.model.EquipmentClass;
-import com.example.monitoring.model.User;
-import com.example.monitoring.model.UserRole;
+import com.example.monitoring.model.*;
+import com.example.monitoring.repository.EmployeeRepository;
 import com.example.monitoring.repository.UserRepository;
 import com.example.monitoring.repository.UserRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,17 +23,30 @@ public class UserController {
     @Autowired
     private UserRoleRepository userRoleRepository;
 
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
     @GetMapping("/user")
-    public ResponseEntity<List<User>> getListUser(@RequestParam(required = false) Integer user_role_id) throws Exception {
+    public ResponseEntity<List<User>> getListUser(@RequestParam(required = false) Integer user_role_id,
+                                                  @RequestParam(required = false) Integer employee_id) throws Exception {
 
         List<User> users = new ArrayList<>();
+        Employee employee;
         UserRole userRole;
 
         if (user_role_id != null) {
             userRole = userRoleRepository.findById(user_role_id)
                     .orElseThrow(() -> new Exception("Not found [user_role] with id = " + user_role_id));
             users.addAll(userRepository.findByUserRole(userRole));
-        } else {
+        }
+
+        if (employee_id != null) {
+            employee = employeeRepository.findById(employee_id)
+                    .orElseThrow(() -> new Exception("Not found [employee] with id = " + employee_id));
+            users.addAll(userRepository.findByEmployee(employee));
+        }
+
+        if (user_role_id == null && employee_id == null) {
             users.addAll(userRepository.findAll());
         }
 
@@ -55,18 +66,24 @@ public class UserController {
 
     @PostMapping("/user")
     public ResponseEntity<User> createUser(@RequestParam Integer user_role_id,
+                                           @RequestParam Integer employee_id,
                                            @RequestBody User user) throws Exception {
-        User entity = userRoleRepository.findById(user_role_id).map(userRole -> {
-            user.setUserRole(userRole);
-            return userRepository.save(user);
-        }).orElseThrow(() -> new Exception("Not found [user_role] with id = " + user_role_id));
+        UserRole userRole = userRoleRepository.findById(user_role_id)
+                .orElseThrow(() -> new Exception("Not found [user_role] with id = " + user_role_id));
 
-        return new ResponseEntity<>(entity, HttpStatus.CREATED);
+        Employee employee = employeeRepository.findById(employee_id)
+                .orElseThrow(() -> new Exception("Not found [employee] with id = " + employee_id));
+
+        user.setUserRole(userRole);
+        user.setEmployee(employee);
+
+        return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
     @PutMapping("/user/{user_id}")
     public ResponseEntity<User> updateUser(@PathVariable("user_id") Integer user_id,
                                            @RequestParam(required = false) Integer user_role_id,
+                                           @RequestParam(required = false) Integer employee_id,
                                            @RequestBody User user) throws Exception {
         User entity;
 
@@ -79,9 +96,14 @@ public class UserController {
 
             entity.setUserRole(userRole);
         }
-        entity.setUser_father_name(user.getUser_father_name());
-        entity.setUser_first_name(user.getUser_first_name());
-        entity.setUser_last_name(user.getUser_last_name());
+
+        if (employee_id != null) {
+            Employee employee = employeeRepository.findById(employee_id)
+                    .orElseThrow(() -> new Exception("Not found [employee] with id = " + employee_id));
+
+            entity.setEmployee(employee);
+        }
+
         entity.setUser_login(user.getUser_login());
         entity.setUser_password(user.getUser_password());
 

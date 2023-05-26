@@ -1,10 +1,7 @@
 package com.example.monitoring.controller;
 
 import com.example.monitoring.model.*;
-import com.example.monitoring.repository.ActionRepository;
-import com.example.monitoring.repository.ActionStateRepository;
-import com.example.monitoring.repository.ActionTypeRepository;
-import com.example.monitoring.repository.WellRepository;
+import com.example.monitoring.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +23,9 @@ public class ActionController {
     private WellRepository wellRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private ActionTypeRepository actionTypeRepository;
 
     @Autowired
@@ -33,12 +33,14 @@ public class ActionController {
 
     @GetMapping("/action")
     public ResponseEntity<List<Action>> getActionList(@RequestParam(required = false) Integer well_id,
+                                                      @RequestParam(required = false) Integer user_id,
                                                       @RequestParam(required = false) Integer action_type_id,
                                                       @RequestParam(required = false) Integer action_state_id) throws Exception {
 
         List<Action> actions = new ArrayList<>();
 
         Well well;
+        User user;
         ActionType actionType;
         ActionState actionState;
 
@@ -46,6 +48,13 @@ public class ActionController {
             well = wellRepository.findById(well_id)
                     .orElseThrow(() -> new Exception("Not found [well] with id = " + well_id));
             actions.addAll(actionRepository.findByWell(well));
+            return new ResponseEntity<>(actions, HttpStatus.OK);
+        }
+
+        if (user_id != null) {
+            user = userRepository.findById(user_id)
+                    .orElseThrow(() -> new Exception("Not found [user] with id = " + user_id));
+            actions.addAll(actionRepository.findByUser(user));
             return new ResponseEntity<>(actions, HttpStatus.OK);
         }
 
@@ -80,6 +89,7 @@ public class ActionController {
 
     @PostMapping("/action")
     public ResponseEntity<Action> createAction(@RequestParam Integer well_id,
+                                               @RequestParam Integer user_id,
                                                @RequestParam Integer action_type_id,
                                                @RequestParam Integer action_state_id,
                                                @RequestBody(required = false) Action action) throws Exception {
@@ -90,6 +100,9 @@ public class ActionController {
         Well well = wellRepository.findById(well_id)
                 .orElseThrow(() -> new Exception("Not found [well] with id = " + well_id));
 
+        User user = userRepository.findById(user_id)
+                .orElseThrow(() -> new Exception("Not found [user] with id = " + user_id));
+
         ActionType actionType = actionTypeRepository.findById(action_type_id)
                 .orElseThrow(() -> new Exception("Not found [action_type] with id = " + action_type_id));
 
@@ -97,6 +110,7 @@ public class ActionController {
                 .orElseThrow(() -> new Exception("Not found [action_state] with id = " + action_state_id));
 
         entity.setWell(well);
+        entity.setUser(user);
         entity.setActionType(actionType);
         entity.setActionState(actionState);
 
@@ -115,11 +129,13 @@ public class ActionController {
     @PutMapping("/action/{action_id}")
     public ResponseEntity<Action> updateAction(@PathVariable("action_id") Integer action_id,
                                                @RequestParam(required = false) Integer well_id,
+                                               @RequestParam(required = false) Integer user_id,
                                                @RequestParam(required = false) Integer action_type_id,
                                                @RequestParam(required = false) Integer action_state_id,
                                                @RequestBody(required = false) Action action) throws Exception {
 
         Well well;
+        User user;
         ActionType actionType;
         ActionState actionState;
 
@@ -130,6 +146,12 @@ public class ActionController {
             well = wellRepository.findById(well_id)
                     .orElseThrow(() -> new Exception("Not found [well] with id = " + well_id));
             entity.setWell(well);
+        }
+
+        if (user_id != null) {
+            user = userRepository.findById(user_id)
+                    .orElseThrow(() -> new Exception("Not found [user] with id = " + user_id));
+            entity.setUser(user);
         }
 
         if (action_type_id != null) {

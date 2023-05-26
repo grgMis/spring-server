@@ -12,20 +12,16 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer user_id;
 
-    @Column(name = "user_last_name", nullable = false, length = 40)
-    private String user_last_name;
-
-    @Column(name = "user_first_name", nullable = false, length = 40)
-    private String user_first_name;
-
-    @Column(name = "user_father_name", nullable = false, length = 40)
-    private String user_father_name;
-
     @Column(name = "user_login", nullable = false, length = 40)
     private String user_login;
 
     @Column(name = "user_password", nullable = false, length = 40)
     private String user_password;
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "employee_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Employee employee;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "user_role_id", nullable = false)
@@ -43,30 +39,6 @@ public class User {
         this.user_id = user_id;
     }
 
-    public String getUser_last_name() {
-        return user_last_name;
-    }
-
-    public void setUser_last_name(String user_last_name) {
-        this.user_last_name = user_last_name;
-    }
-
-    public String getUser_first_name() {
-        return user_first_name;
-    }
-
-    public void setUser_first_name(String user_first_name) {
-        this.user_first_name = user_first_name;
-    }
-
-    public String getUser_father_name() {
-        return user_father_name;
-    }
-
-    public void setUser_father_name(String user_father_name) {
-        this.user_father_name = user_father_name;
-    }
-
     public String getUser_login() {
         return user_login;
     }
@@ -81,6 +53,14 @@ public class User {
 
     public void setUser_password(String user_password) {
         this.user_password = user_password;
+    }
+
+    public Employee getEmployee() {
+        return employee;
+    }
+
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
     }
 
     public UserRole getUserRole() {

@@ -16,7 +16,7 @@ public class ActionComposition {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer action_composition_id;
 
-    @Column(name = "date_entry", nullable = false)
+    @Column(name = "date_complete")
     @DateTimeFormat(pattern = "dd/MM/yyyy")
     @JsonFormat(pattern = "dd-MM-yyyy", shape = JsonFormat.Shape.STRING)
     private Date date_complete;
@@ -33,11 +33,6 @@ public class ActionComposition {
     @JoinColumn(name = "equipment_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Equipment equipment;
-
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private User user;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "action_composition_state_id", nullable = false)
@@ -85,14 +80,6 @@ public class ActionComposition {
 
     public void setEquipment(Equipment equipment) {
         this.equipment = equipment;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public ActionCompositionState getActionCompositionState() {

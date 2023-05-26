@@ -25,7 +25,7 @@ public class Well {
     private Date date_entry;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "dept_id", nullable = false)
+    @JoinColumn(name = "company_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Company company;
 

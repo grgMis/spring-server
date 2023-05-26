@@ -37,7 +37,7 @@ public class UserRoleController {
     }
 
     @GetMapping("/user-role/{user_role_id}")
-    public ResponseEntity<UserRole> getUserRoleById(@PathVariable("well_state_id") Integer user_role_id) throws Exception {
+    public ResponseEntity<UserRole> getUserRoleById(@PathVariable("user_role_id") Integer user_role_id) throws Exception {
         UserRole userRole = userRoleRepository.findById(user_role_id)
                 .orElseThrow(() -> new Exception("Not found [user_role] with id = " + user_role_id));
         return new ResponseEntity<>(userRole, HttpStatus.OK);
