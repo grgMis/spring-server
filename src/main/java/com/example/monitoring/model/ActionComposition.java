@@ -17,8 +17,8 @@ public class ActionComposition {
     private Integer action_composition_id;
 
     @Column(name = "date_complete")
-    @DateTimeFormat(pattern = "dd/MM/yyyy")
-    @JsonFormat(pattern = "dd-MM-yyyy", shape = JsonFormat.Shape.STRING)
+    @DateTimeFormat(pattern = "dd.MM.yyyy")
+    @JsonFormat(pattern = "dd.MM.yyyy", shape = JsonFormat.Shape.STRING)
     private Date date_complete;
 
     @Column(name = "action_composition_note", length = 100)

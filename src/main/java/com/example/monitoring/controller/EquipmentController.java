@@ -74,6 +74,17 @@ public class EquipmentController {
 
         Date date = new Date();
 
+        String currentInventoryNumber = equipment.getInventory_number();
+        String currentFactoryNumber = equipment.getFactory_number();
+
+        if (equipmentRepository.findByInventory_number(currentInventoryNumber) != null) {
+            throw new Exception("Инвентарный номер уже существует");
+        }
+
+        if (equipmentRepository.findByFactory_number(currentFactoryNumber) != null) {
+            throw new Exception("Заводской номер уже существует");
+        }
+
         EquipmentModel equipmentModel = equipmentModelRepository.findById(equipment_model_id)
                 .orElseThrow(() -> new Exception("Not found [equipment_model] with id = " + equipment_model_id));
 
