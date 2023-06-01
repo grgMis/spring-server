@@ -20,51 +20,80 @@ public class EmployeePostController {
 
     @GetMapping("/employee-post")
     public ResponseEntity<List<EmployeePost>> getListEmployeePost(@RequestParam(required = false) String employee_post_name) {
-        List<EmployeePost> employeePosts = new ArrayList<>();
 
-        if (employee_post_name == null) {
-            employeePosts.addAll(employeePostRepository.findAll());
-        } else {
-            employeePosts.addAll(employeePostRepository.findByEmployee_post_name(employee_post_name));
+        try {
+            List<EmployeePost> employeePosts = new ArrayList<>();
+
+            if (employee_post_name == null) {
+                employeePosts.addAll(employeePostRepository.findAll());
+            } else {
+                employeePosts.addAll(employeePostRepository.findByEmployee_post_name(employee_post_name));
+            }
+
+            if (employeePosts.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            return new ResponseEntity<>(employeePosts, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        if (employeePosts.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-
-        return new ResponseEntity<>(employeePosts, HttpStatus.OK);
     }
 
     @GetMapping("/employee-post/{employee_post_id}")
-    public ResponseEntity<EmployeePost> getEmployeePostById(@PathVariable("employee_post_id") Integer employee_post_id) throws Exception {
-        EmployeePost employeePost = employeePostRepository.findById(employee_post_id)
-                .orElseThrow(() -> new Exception("Not found [employee_post] with id = " + employee_post_id));
-        return new ResponseEntity<>(employeePost, HttpStatus.OK);
+    public ResponseEntity<EmployeePost> getEmployeePostById(@PathVariable("employee_post_id") Integer employee_post_id) {
+
+        try {
+            EmployeePost employeePost = employeePostRepository.findById(employee_post_id)
+                    .orElseThrow(() -> new Exception("Not found [employee_post] with id = " + employee_post_id));
+            return new ResponseEntity<>(employeePost, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/employee-post")
     public ResponseEntity<EmployeePost> createEmployeePost(@RequestBody EmployeePost employeePost) {
-        EmployeePost entity = employeePostRepository
-                .save(new EmployeePost(employeePost.getEmployee_post_name()));
-        return new ResponseEntity<>(entity, HttpStatus.CREATED);
+
+        try {
+            EmployeePost entity = employeePostRepository
+                    .save(new EmployeePost(employeePost.getEmployee_post_name()));
+            return new ResponseEntity<>(entity, HttpStatus.CREATED);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping("/employee-post/{employee_post_id}")
     public ResponseEntity<EmployeePost> updateEmployeePost(@PathVariable("employee_post_id") Integer employee_post_id,
-                                                           @RequestBody EmployeePost employeePost) throws Exception {
-        EmployeePost entity = employeePostRepository.findById(employee_post_id)
-                .orElseThrow(() -> new Exception("Not found [employee_post] with id = " + employee_post_id));
+                                                           @RequestBody EmployeePost employeePost) {
 
-        entity.setEmployee_post_name(employeePost.getEmployee_post_name());
+        try {
+            EmployeePost entity = employeePostRepository.findById(employee_post_id)
+                    .orElseThrow(() -> new Exception("Not found [employee_post] with id = " + employee_post_id));
 
-        return new ResponseEntity<>(employeePostRepository.save(entity), HttpStatus.OK);
+            entity.setEmployee_post_name(employeePost.getEmployee_post_name());
+
+            employeePostRepository.save(entity);
+
+            return new ResponseEntity<>(entity, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @DeleteMapping("/employee-post/{employee_post_id}")
     public ResponseEntity<HttpStatus> deleteEmployeePost(@PathVariable("employee_post_id") Integer employee_post_id) {
 
-        employeePostRepository.deleteById(employee_post_id);
+        try {
+            employeePostRepository.findById(employee_post_id)
+                    .orElseThrow(() -> new Exception("Not found [employee_post] with id = " + employee_post_id));
 
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            employeePostRepository.deleteById(employee_post_id);
+
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

@@ -21,50 +21,81 @@ public class ActionTypeController {
     @GetMapping("/action-type")
     public ResponseEntity<List<ActionType>> getActionTypeList(@RequestParam(required = false) String action_type_name) {
 
-        List<ActionType> actionTypes = new ArrayList<>();
+        try {
+            List<ActionType> actionTypes = new ArrayList<>();
 
-        if (action_type_name == null) {
-            actionTypes.addAll(actionTypeRepository.findAll());
-        } else {
-            actionTypes.addAll(actionTypeRepository.findByAction_type_name(action_type_name));
+            if (action_type_name == null) {
+                actionTypes.addAll(actionTypeRepository.findAll());
+            } else {
+                actionTypes.addAll(actionTypeRepository.findByAction_type_name(action_type_name));
+            }
+
+            if (actionTypes.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            return new ResponseEntity<>(actionTypes, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        if (actionTypes.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-
-        return new ResponseEntity<>(actionTypes, HttpStatus.OK);
     }
 
     @GetMapping("/action-type/{action_type_id}")
-    public ResponseEntity<ActionType> getActionTypeById(@PathVariable("action_type_id") Integer action_type_id) throws Exception {
-        ActionType actionType = actionTypeRepository.findById(action_type_id)
-                .orElseThrow(() -> new Exception("Not found [action_type] with id = " + action_type_id));
-        return new ResponseEntity<>(actionType, HttpStatus.OK);
+    public ResponseEntity<ActionType> getActionTypeById(@PathVariable("action_type_id") Integer action_type_id) {
+
+        try {
+            ActionType actionType = actionTypeRepository.findById(action_type_id)
+                    .orElseThrow(() -> new Exception("Not found [action_type] with id = " + action_type_id));
+
+            return new ResponseEntity<>(actionType, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/action-type")
     public ResponseEntity<ActionType> createActionType(@RequestBody ActionType actionType) {
-        ActionType entity = actionTypeRepository
-                .save(new ActionType(actionType.getAction_type_name()));
-        return new ResponseEntity<>(entity, HttpStatus.CREATED);
+
+        try {
+            ActionType entity = actionTypeRepository
+                    .save(new ActionType(actionType.getAction_type_name()));
+
+            return new ResponseEntity<>(entity, HttpStatus.CREATED);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping("/action-type/{action_type_id}")
     public ResponseEntity<ActionType> updateActionType(@PathVariable("action_type_id") Integer action_type_id,
-                                                       @RequestBody ActionType actionType) throws Exception {
-        ActionType entity = actionTypeRepository.findById(action_type_id)
-                .orElseThrow(() -> new Exception("Not found [action_type] with id = " + action_type_id));
+                                                       @RequestBody ActionType actionType) {
 
-        entity.setAction_type_name(actionType.getAction_type_name());
+        try {
+            ActionType entity = actionTypeRepository.findById(action_type_id)
+                    .orElseThrow(() -> new Exception("Not found [action_type] with id = " + action_type_id));
 
-        return new ResponseEntity<>(actionTypeRepository.save(entity), HttpStatus.OK);
+            entity.setAction_type_name(actionType.getAction_type_name());
+
+            actionTypeRepository.save(entity);
+
+            return new ResponseEntity<>(entity, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @DeleteMapping("/action-type/{action_type_id}")
     public ResponseEntity<HttpStatus> deleteActionType(@PathVariable("action_type_id") Integer action_type_id) {
-        actionTypeRepository.deleteById(action_type_id);
 
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        try {
+            actionTypeRepository.findById(action_type_id)
+                    .orElseThrow(() -> new Exception("Not found [action_type] with id = " + action_type_id));
+
+            actionTypeRepository.deleteById(action_type_id);
+
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

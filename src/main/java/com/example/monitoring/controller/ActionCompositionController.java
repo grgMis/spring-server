@@ -27,81 +27,137 @@ public class ActionCompositionController {
     @Autowired
     private ActionCompositionStateRepository actionCompositionStateRepository;
 
+    @Autowired
+    private WellRepository wellRepository;
+
+    @Autowired
+    private EquipmentStateRepository equipmentStateRepository;
+
+    @Autowired
+    private EquipmentCategoryRepository equipmentCategoryRepository;
+
     @GetMapping("/action-composition")
     public ResponseEntity<List<ActionComposition>> getListActionComposition(@RequestParam(required = false) Integer action_id,
+                                                                            @RequestParam(required = false) Integer well_id,
+                                                                            @RequestParam(required = false) Integer equipment_state_id,
+                                                                            @RequestParam(required = false) Integer equipment_category_id,
                                                                             @RequestParam(required = false) Integer equipment_id,
-                                                                            @RequestParam(required = false) Integer action_composition_state_id) throws Exception {
-        List<ActionComposition> actionCompositions = new ArrayList<>();
+                                                                            @RequestParam(required = false) Integer action_composition_state_id) {
 
-        Action action;
-        Equipment equipment;
-        ActionCompositionState actionCompositionState;
+        try {
+            List<ActionComposition> actionCompositions = new ArrayList<>();
 
-        if (action_id != null) {
-            action = actionRepository.findById(action_id)
-                    .orElseThrow(() -> new Exception("Not found [action] with id = " + action_id));
-            actionCompositions.addAll(actionCompositionRepository.findByAction(action));
+            Action action;
+            Well well;
+            EquipmentState equipmentState;
+            EquipmentCategory equipmentCategory;
+            Equipment equipment;
+            ActionCompositionState actionCompositionState;
+
+            if (action_id == null &&
+                equipment_id == null &&
+                action_composition_state_id == null &&
+                well_id == null &&
+                equipment_state_id == null &&
+                equipment_category_id == null) {
+                actionCompositions.addAll(actionCompositionRepository.findAll());
+            }
+
+            if (well_id != null && equipment_state_id != null) {
+                well = wellRepository.findById(well_id)
+                        .orElseThrow(() -> new Exception("Not found [well] with id = " + well_id));
+
+                equipmentState = equipmentStateRepository.findById(equipment_state_id)
+                        .orElseThrow(() -> new Exception("Not found [equipment_state] with id = " + equipment_state_id));
+
+                actionCompositions.addAll(actionCompositionRepository.findByAction_WellAndEquipment_EquipmentState(well, equipmentState));
+            }
+
+            if (well_id != null && equipment_category_id != null) {
+                well = wellRepository.findById(well_id)
+                        .orElseThrow(() -> new Exception("Not found [well] with id = " + well_id));
+
+                equipmentCategory = equipmentCategoryRepository.findById(equipment_category_id)
+                        .orElseThrow(() -> new Exception("Not found [equipment_category] with id = " + equipment_category_id));
+
+                actionCompositions.addAll(actionCompositionRepository.findByAction_WellAndEquipment_EquipmentModel_EquipmentClass_EquipmentCategory(well, equipmentCategory));
+            }
+
+            if (action_id != null) {
+                action = actionRepository.findById(action_id)
+                        .orElseThrow(() -> new Exception("Not found [action] with id = " + action_id));
+                actionCompositions.addAll(actionCompositionRepository.findByAction(action));
+            }
+
+            if (equipment_id != null) {
+                equipment = equipmentRepository.findById(equipment_id)
+                        .orElseThrow(() -> new Exception("Not found [equipment] with id = " + equipment_id));
+                actionCompositions.addAll(actionCompositionRepository.findByEquipment(equipment));
+            }
+
+            if (action_composition_state_id != null) {
+                actionCompositionState = actionCompositionStateRepository.findById(action_composition_state_id)
+                        .orElseThrow(() -> new Exception("Not found [action_composition_state] with id = " + action_composition_state_id));
+                actionCompositions.addAll(actionCompositionRepository.findByActionCompositionState(actionCompositionState));
+            }
+
+            if (actionCompositions.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
             return new ResponseEntity<>(actionCompositions, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        if (equipment_id != null) {
-            equipment = equipmentRepository.findById(equipment_id)
-                    .orElseThrow(() -> new Exception("Not found [equipment] with id = " + equipment_id));
-            actionCompositions.addAll(actionCompositionRepository.findByEquipment(equipment));
-            return new ResponseEntity<>(actionCompositions, HttpStatus.OK);
-        }
-
-        if (action_composition_state_id != null) {
-            actionCompositionState = actionCompositionStateRepository.findById(action_composition_state_id)
-                    .orElseThrow(() -> new Exception("Not found [action_composition_state] with id = " + action_composition_state_id));
-            actionCompositions.addAll(actionCompositionRepository.findByActionCompositionState(actionCompositionState));
-            return new ResponseEntity<>(actionCompositions, HttpStatus.OK);
-        }
-
-        if (actionCompositions.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-
-        actionCompositions.addAll(actionCompositionRepository.findAll());
-        return new ResponseEntity<>(actionCompositions, HttpStatus.OK);
     }
 
     @GetMapping("/action-composition/{action_composition_id}")
-    public ResponseEntity<ActionComposition> getActionCompositionById(@PathVariable("action_composition_id") Integer action_composition_id) throws Exception {
-        ActionComposition actionComposition = actionCompositionRepository.findById(action_composition_id)
-                .orElseThrow(() -> new Exception("Not found [action_composition] with id = " + action_composition_id));
-        return new ResponseEntity<>(actionComposition, HttpStatus.OK);
+    public ResponseEntity<ActionComposition> getActionCompositionById(@PathVariable("action_composition_id") Integer action_composition_id) {
+
+        try {
+            ActionComposition actionComposition = actionCompositionRepository.findById(action_composition_id)
+                    .orElseThrow(() -> new Exception("Not found [action_composition] with id = " + action_composition_id));
+
+            return new ResponseEntity<>(actionComposition, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/action-composition")
     public ResponseEntity<ActionComposition> createActionComposition(@RequestParam Integer action_id,
                                                                      @RequestParam Integer equipment_id,
                                                                      @RequestParam Integer action_composition_state_id,
-                                                                     @RequestBody(required = false) ActionComposition actionComposition) throws Exception {
+                                                                     @RequestBody(required = false) ActionComposition actionComposition) {
 
-        ActionComposition entity = new ActionComposition();
+        try {
+            ActionComposition entity = new ActionComposition();
 
-        Action action = actionRepository.findById(action_id)
-                .orElseThrow(() -> new Exception("Not found [action] with id = " + action_id));
+            Action action = actionRepository.findById(action_id)
+                    .orElseThrow(() -> new Exception("Not found [action] with id = " + action_id));
 
-        Equipment equipment = equipmentRepository.findById(equipment_id)
-                .orElseThrow(() -> new Exception("Not found [equipment] with id = " + equipment_id));
+            Equipment equipment = equipmentRepository.findById(equipment_id)
+                    .orElseThrow(() -> new Exception("Not found [equipment] with id = " + equipment_id));
 
-        ActionCompositionState actionCompositionState = actionCompositionStateRepository.findById(action_composition_state_id)
-                .orElseThrow(() -> new Exception("Not found [action_composition_state] with id = " + action_composition_state_id));
+            ActionCompositionState actionCompositionState = actionCompositionStateRepository.findById(action_composition_state_id)
+                    .orElseThrow(() -> new Exception("Not found [action_composition_state] with id = " + action_composition_state_id));
 
-        entity.setAction(action);
-        entity.setEquipment(equipment);
-        entity.setActionCompositionState(actionCompositionState);
 
-        if (actionComposition != null) {
-            entity.setDate_complete(actionComposition.getDate_complete());
-            entity.setAction_composition_note(actionComposition.getAction_composition_note());
+            entity.setAction(action);
+            entity.setEquipment(equipment);
+            entity.setActionCompositionState(actionCompositionState);
+
+            if (actionComposition != null) {
+                entity.setDate_complete(actionComposition.getDate_complete());
+                entity.setAction_composition_note(actionComposition.getAction_composition_note());
+            }
+
+            actionCompositionRepository.save(entity);
+
+            return new ResponseEntity<>(entity, HttpStatus.CREATED);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        actionCompositionRepository.save(entity);
-
-        return new ResponseEntity<>(entity, HttpStatus.CREATED);
     }
 
     @PutMapping("/action-composition/{action_composition_id}")
@@ -109,49 +165,59 @@ public class ActionCompositionController {
                                                                      @RequestParam(required = false) Integer action_id,
                                                                      @RequestParam(required = false) Integer equipment_id,
                                                                      @RequestParam(required = false) Integer action_composition_state_id,
-                                                                     @RequestBody(required = false) ActionComposition actionComposition) throws Exception {
+                                                                     @RequestBody(required = false) ActionComposition actionComposition) {
 
-        Action action;
-        Equipment equipment;
-        ActionCompositionState actionCompositionState;
+        try {
+            Action action;
+            Equipment equipment;
+            ActionCompositionState actionCompositionState;
 
-        ActionComposition entity = actionCompositionRepository.findById(action_composition_id)
-                .orElseThrow(() -> new Exception("Not found [action_composition] with id = " + action_composition_id));
+            ActionComposition entity = actionCompositionRepository.findById(action_composition_id)
+                    .orElseThrow(() -> new Exception("Not found [action_composition] with id = " + action_composition_id));
 
-        if (action_id != null) {
-            action = actionRepository.findById(action_id)
-                    .orElseThrow(() -> new Exception("Not found [action] with id = " + action_id));
-            entity.setAction(action);
+            if (action_id != null) {
+                action = actionRepository.findById(action_id)
+                        .orElseThrow(() -> new Exception("Not found [action] with id = " + action_id));
+                entity.setAction(action);
+            }
+
+            if (equipment_id != null) {
+                equipment = equipmentRepository.findById(equipment_id)
+                        .orElseThrow(() -> new Exception("Not found [equipment] with id = " + equipment_id));
+                entity.setEquipment(equipment);
+            }
+
+            if (action_composition_state_id != null) {
+                actionCompositionState = actionCompositionStateRepository.findById(action_composition_state_id)
+                        .orElseThrow(() -> new Exception("Not found [action_composition_state] with id = " + action_composition_state_id));
+                entity.setActionCompositionState(actionCompositionState);
+            }
+
+            if (actionComposition != null) {
+                entity.setDate_complete(actionComposition.getDate_complete());
+                entity.setAction_composition_note(actionComposition.getAction_composition_note());
+            }
+
+            actionCompositionRepository.save(entity);
+
+            return new ResponseEntity<>(entity, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        if (equipment_id != null) {
-            equipment = equipmentRepository.findById(equipment_id)
-                    .orElseThrow(() -> new Exception("Not found [equipment] with id = " + equipment_id));
-            entity.setEquipment(equipment);
-        }
-
-        if (action_composition_state_id != null) {
-            actionCompositionState = actionCompositionStateRepository.findById(action_composition_state_id)
-                    .orElseThrow(() -> new Exception("Not found [action_composition_state] with id = " + action_composition_state_id));
-            entity.setActionCompositionState(actionCompositionState);
-        }
-
-        if (actionComposition != null) {
-            entity.setDate_complete(actionComposition.getDate_complete());
-            entity.setAction_composition_note(actionComposition.getAction_composition_note());
-        }
-
-        actionCompositionRepository.save(entity);
-
-        return new ResponseEntity<>(entity, HttpStatus.OK);
     }
 
     @DeleteMapping("/action-composition/{action_composition_id}")
     public ResponseEntity<ActionComposition> deleteActionComposition(@PathVariable("action_composition_id") Integer action_composition_id) {
 
-        actionCompositionRepository.deleteById(action_composition_id);
+        try {
+            actionCompositionRepository.findById(action_composition_id)
+                    .orElseThrow(() -> new Exception("Not found [action_composition] with id = " + action_composition_id));
 
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            actionCompositionRepository.deleteById(action_composition_id);
+
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
-
 }

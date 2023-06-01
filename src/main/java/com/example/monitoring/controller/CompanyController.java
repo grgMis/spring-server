@@ -25,86 +25,113 @@ public class CompanyController {
 
     @GetMapping("/company")
     public ResponseEntity<List<Company>> getListCompany(@RequestParam(required = false) String company_name,
-                                                        @RequestParam(required = false) Integer field_id) throws Exception {
+                                                        @RequestParam(required = false) Integer field_id) {
 
-        List<Company> companies = new ArrayList<>();
+        try {
+            List<Company> companies = new ArrayList<>();
 
-        Field field;
+            Field field;
 
-        if (company_name != null) {
-            companies.addAll(companyRepository.findByCompany_name(company_name));
+            if (company_name == null && field_id == null) {
+                companies.addAll(companyRepository.findAll());
+            }
+
+            if (company_name != null) {
+                companies.addAll(companyRepository.findByCompany_name(company_name));
+            }
+
+            if (field_id != null) {
+                field = fieldRepository.findById(field_id)
+                        .orElseThrow(() -> new Exception("Not found [field] with id = " + field_id));
+                companies.addAll(companyRepository.findByField(field));
+            }
+
+            if (companies.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
             return new ResponseEntity<>(companies, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        if (field_id != null) {
-            field = fieldRepository.findById(field_id)
-                    .orElseThrow(() -> new Exception("Not found [field] with id = " + field_id));
-            companies.addAll(companyRepository.findByField(field));
-            return new ResponseEntity<>(companies, HttpStatus.OK);
-        }
-
-        if (company_name == null && field_id == null) {
-            companies.addAll(companyRepository.findAll());
-            return new ResponseEntity<>(companies, HttpStatus.OK);
-        }
-
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/company/{company_id}")
-    public ResponseEntity<Company> getCompanyById(@PathVariable("dept_id") Integer company_id) throws Exception {
-        Company company = companyRepository.findById(company_id)
-                .orElseThrow(() -> new Exception("Not found [company] with id = " + company_id));
-        return new ResponseEntity<>(company, HttpStatus.OK);
+    public ResponseEntity<Company> getCompanyById(@PathVariable("dept_id") Integer company_id) {
+
+        try {
+            Company company = companyRepository.findById(company_id)
+                    .orElseThrow(() -> new Exception("Not found [company] with id = " + company_id));
+
+            return new ResponseEntity<>(company, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/company")
     public ResponseEntity<Company> createCompany(@RequestParam Integer field_id,
-                                                 @RequestBody Company company) throws Exception {
+                                                 @RequestBody Company company) {
 
-        Date date = new Date();
+        try {
+            Date date = new Date();
 
-        Field field = fieldRepository.findById(field_id)
-                .orElseThrow(() -> new Exception("Not found [field] with id = " + field_id));
+            Field field = fieldRepository.findById(field_id)
+                    .orElseThrow(() -> new Exception("Not found [field] with id = " + field_id));
 
-        company.setField(field);
-        company.setDate_entry(date);
+            company.setField(field);
+            company.setDate_entry(date);
 
-        companyRepository.save(company);
+            companyRepository.save(company);
 
-        return new ResponseEntity<>(company, HttpStatus.CREATED);
+            return new ResponseEntity<>(company, HttpStatus.CREATED);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping("/company/{company_id}")
     public ResponseEntity<Company> updateCompany(@PathVariable("company_id") Integer company_id,
                                                  @RequestParam(required = false) Integer field_id,
-                                                 @RequestBody Company company) throws Exception {
-        Date date = new Date();
+                                                 @RequestBody Company company) {
 
-        Field field;
+        try {
+            Date date = new Date();
 
-        Company entity = companyRepository.findById(company_id)
-                .orElseThrow(() -> new Exception("Not found [company] with id = " + company_id));
+            Field field;
 
-        if (field_id != null) {
-            field = fieldRepository.findById(field_id)
-                    .orElseThrow(() -> new Exception("Not found [field] with id = " + field_id));
-            entity.setField(field);
+            Company entity = companyRepository.findById(company_id)
+                    .orElseThrow(() -> new Exception("Not found [company] with id = " + company_id));
+
+            if (field_id != null) {
+                field = fieldRepository.findById(field_id)
+                        .orElseThrow(() -> new Exception("Not found [field] with id = " + field_id));
+                entity.setField(field);
+            }
+
+            entity.setCompany_name(company.getCompany_name());
+            entity.setDate_entry(date);
+
+            companyRepository.save(entity);
+
+            return new ResponseEntity<>(entity, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        entity.setCompany_name(company.getCompany_name());
-        entity.setDate_entry(date);
-
-        companyRepository.save(entity);
-
-        return new ResponseEntity<>(entity, HttpStatus.OK);
     }
 
     @DeleteMapping("/company/{company_id}")
     public ResponseEntity<Company> deleteCompany(@PathVariable("company_id") Integer company_id) {
 
-        companyRepository.deleteById(company_id);
+        try {
+            companyRepository.findById(company_id)
+                    .orElseThrow(() -> new Exception("Not found [company] with id = " + company_id));
 
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            companyRepository.deleteById(company_id);
+
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

@@ -25,76 +25,105 @@ public class EquipmentModelController {
 
     @GetMapping("/equipment-model")
     public ResponseEntity<List<EquipmentModel>> getListEquipmentModel(@RequestParam(required = false) String equipment_model_name,
-                                                                      @RequestParam(required = false) Integer equipment_class_id) throws Exception {
-        List<EquipmentModel> equipmentModels = new ArrayList<>();
+                                                                      @RequestParam(required = false) Integer equipment_class_id) {
 
-        EquipmentClass equipmentClass;
+        try {
+            List<EquipmentModel> equipmentModels = new ArrayList<>();
 
-        if (equipment_model_name != null) {
-            equipmentModels.addAll(equipmentModelRepository.findByEquipment_model_name(equipment_model_name));
-            return new ResponseEntity<>(equipmentModels, HttpStatus.CREATED);
+            EquipmentClass equipmentClass;
+
+            if (equipment_model_name == null && equipment_class_id == null) {
+                equipmentModels.addAll(equipmentModelRepository.findAll());
+            }
+
+            if (equipment_model_name != null) {
+                equipmentModels.addAll(equipmentModelRepository.findByEquipment_model_name(equipment_model_name));
+            }
+
+            if (equipment_class_id != null) {
+                equipmentClass = equipmentClassRepository.findById(equipment_class_id)
+                        .orElseThrow(() -> new Exception("Not found [equipment_class] with id = " + equipment_class_id));
+                equipmentModels.addAll(equipmentModelRepository.findByEquipmentClass(equipmentClass));
+            }
+
+            if (equipmentModels.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            return new ResponseEntity<>(equipmentModels, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        if (equipment_class_id != null) {
-            equipmentClass = equipmentClassRepository.findById(equipment_class_id)
-                    .orElseThrow(() -> new Exception("Not found [equipment_class] with id = " + equipment_class_id));
-            equipmentModels.addAll(equipmentModelRepository.findByEquipmentClass(equipmentClass));
-            return new ResponseEntity<>(equipmentModels, HttpStatus.CREATED);
-        }
-
-        if (equipment_model_name == null && equipment_class_id == null) {
-            equipmentModels.addAll(equipmentModelRepository.findAll());
-            return new ResponseEntity<>(equipmentModels, HttpStatus.CREATED);
-        }
-
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/equipment-model/{equipment_model_id}")
-    public ResponseEntity<EquipmentModel> getEquipmentModelById(@PathVariable("equipment_model_id") Integer equipment_model_id) throws Exception {
-        EquipmentModel equipmentModel = equipmentModelRepository.findById(equipment_model_id)
-                .orElseThrow(() -> new Exception("Not found [equipment_model] with id = " + equipment_model_id));
-        return new ResponseEntity<>(equipmentModel, HttpStatus.OK);
+    public ResponseEntity<EquipmentModel> getEquipmentModelById(@PathVariable("equipment_model_id") Integer equipment_model_id) {
+
+        try {
+            EquipmentModel equipmentModel = equipmentModelRepository.findById(equipment_model_id)
+                    .orElseThrow(() -> new Exception("Not found [equipment_model] with id = " + equipment_model_id));
+
+            return new ResponseEntity<>(equipmentModel, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/equipment-model")
     public ResponseEntity<EquipmentModel> createEquipmentModel(@RequestParam Integer equipment_class_id,
-                                                               @RequestBody EquipmentModel equipmentModel) throws Exception {
-        EquipmentModel entity = equipmentClassRepository.findById(equipment_class_id).map(equipmentClass -> {
-            equipmentModel.setEquipmentClass(equipmentClass);
-            return equipmentModelRepository.save(equipmentModel);
-        }).orElseThrow(() -> new Exception("Not found [equipment_class] with id = " + equipment_class_id));
+                                                               @RequestBody EquipmentModel equipmentModel) {
 
+        try {
+            EquipmentModel entity = equipmentClassRepository.findById(equipment_class_id).map(equipmentClass -> {
+                equipmentModel.setEquipmentClass(equipmentClass);
+                return equipmentModelRepository.save(equipmentModel);
+            }).orElseThrow(() -> new Exception("Not found [equipment_class] with id = " + equipment_class_id));
 
-
-        return new ResponseEntity<>(entity, HttpStatus.CREATED);
+            return new ResponseEntity<>(entity, HttpStatus.CREATED);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping("/equipment-model/{equipment_model_id}")
     public ResponseEntity<EquipmentModel> updateEquipmentModel(@PathVariable("equipment_model_id") Integer equipment_model_id,
                                                                @RequestParam(required = false) Integer equipment_class_id,
-                                                               @RequestBody EquipmentModel equipmentModel) throws Exception {
-        EquipmentModel entity;
+                                                               @RequestBody EquipmentModel equipmentModel) {
 
-        entity = equipmentModelRepository.findById(equipment_model_id)
-                .orElseThrow(() -> new Exception("Not found [equipment_model_id] with id = " + equipment_model_id));
+        try {
+            EquipmentModel entity;
 
-        if (equipment_class_id != null) {
-            EquipmentClass equipmentClass = equipmentClassRepository.findById(equipment_class_id)
-                    .orElseThrow(() -> new Exception("Not found [equipment_class] with id = " + equipment_class_id));
+            entity = equipmentModelRepository.findById(equipment_model_id)
+                    .orElseThrow(() -> new Exception("Not found [equipment_model_id] with id = " + equipment_model_id));
 
-            entity.setEquipmentClass(equipmentClass);
+            if (equipment_class_id != null) {
+                EquipmentClass equipmentClass = equipmentClassRepository.findById(equipment_class_id)
+                        .orElseThrow(() -> new Exception("Not found [equipment_class] with id = " + equipment_class_id));
+
+                entity.setEquipmentClass(equipmentClass);
+            }
+            entity.setEquipment_model_name(equipmentModel.getEquipment_model_name());
+
+            equipmentModelRepository.save(entity);
+
+            return new ResponseEntity<>(entity, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        entity.setEquipment_model_name(equipmentModel.getEquipment_model_name());
-
-        return new ResponseEntity<>(equipmentModelRepository.save(entity), HttpStatus.OK);
     }
 
     @DeleteMapping("/equipment-model/{equipment_model_id}")
     public ResponseEntity<EquipmentModel> deleteEquipmentModel(@PathVariable("equipment_model_id") Integer equipment_model_id) {
 
-        equipmentModelRepository.deleteById(equipment_model_id);
+        try {
+            equipmentModelRepository.findById(equipment_model_id)
+                    .orElseThrow(() -> new Exception("Not found [equipment_model_id] with id = " + equipment_model_id));
 
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            equipmentModelRepository.deleteById(equipment_model_id);
+
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

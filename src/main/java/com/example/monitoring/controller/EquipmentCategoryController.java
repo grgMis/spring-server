@@ -20,51 +20,81 @@ public class EquipmentCategoryController {
 
     @GetMapping("/equipment-category")
     public ResponseEntity<List<EquipmentCategory>> getListEquipmentCategories(@RequestParam(required = false) String equipment_category_name) {
-        List<EquipmentCategory> equipmentCategories = new ArrayList<>();
 
-        if (equipment_category_name == null) {
-            equipmentCategories.addAll(equipmentCategoryRepository.findAll());
-        } else {
-            equipmentCategories.addAll(equipmentCategoryRepository.findByEquipment_category_name(equipment_category_name));
+        try {
+            List<EquipmentCategory> equipmentCategories = new ArrayList<>();
+
+            if (equipment_category_name == null) {
+                equipmentCategories.addAll(equipmentCategoryRepository.findAll());
+            } else {
+                equipmentCategories.addAll(equipmentCategoryRepository.findByEquipment_category_name(equipment_category_name));
+            }
+
+            if (equipmentCategories.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            return new ResponseEntity<>(equipmentCategories, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        if (equipmentCategories.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-
-        return new ResponseEntity<>(equipmentCategories, HttpStatus.OK);
     }
 
     @GetMapping("/equipment-category/{equipment_category_id}")
-    public ResponseEntity<EquipmentCategory> getEquipmentCategoryById(@PathVariable("equipment_category_id") Integer equipment_category_id) throws Exception {
-        EquipmentCategory equipmentCategory = equipmentCategoryRepository.findById(equipment_category_id)
-                .orElseThrow(() -> new Exception("Not found [equipment_category] with id = " + equipment_category_id));
-        return new ResponseEntity<>(equipmentCategory, HttpStatus.OK);
+    public ResponseEntity<EquipmentCategory> getEquipmentCategoryById(@PathVariable("equipment_category_id") Integer equipment_category_id) {
+
+        try {
+            EquipmentCategory equipmentCategory = equipmentCategoryRepository.findById(equipment_category_id)
+                    .orElseThrow(() -> new Exception("Not found [equipment_category] with id = " + equipment_category_id));
+            return new ResponseEntity<>(equipmentCategory, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/equipment-category")
     public ResponseEntity<EquipmentCategory> createEquipmentCategory(@RequestBody EquipmentCategory equipmentCategory) {
-        EquipmentCategory entity = equipmentCategoryRepository
-                .save(new EquipmentCategory(equipmentCategory.getEquipment_category_name(), equipmentCategory.getEquipment_category_sysname()));
-        return new ResponseEntity<>(entity, HttpStatus.CREATED);
+
+        try {
+            EquipmentCategory entity = equipmentCategoryRepository
+                    .save(new EquipmentCategory(equipmentCategory.getEquipment_category_name(), equipmentCategory.getEquipment_category_sysname()));
+            return new ResponseEntity<>(entity, HttpStatus.CREATED);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping("/equipment-category/{equipment_category_id}")
     public ResponseEntity<EquipmentCategory> updateEquipmentCategory(@PathVariable("equipment_category_id") Integer equipment_category_id,
-                                                                     @RequestBody EquipmentCategory equipmentCategory) throws Exception {
-        EquipmentCategory entity = equipmentCategoryRepository.findById(equipment_category_id)
-                .orElseThrow(() -> new Exception("Not found [equipment_category] with id = " + equipment_category_id));
+                                                                     @RequestBody EquipmentCategory equipmentCategory) {
 
-        entity.setEquipment_category_name(equipmentCategory.getEquipment_category_name());
-        entity.setEquipment_category_sysname(equipmentCategory.getEquipment_category_sysname());
+        try {
+            EquipmentCategory entity = equipmentCategoryRepository.findById(equipment_category_id)
+                    .orElseThrow(() -> new Exception("Not found [equipment_category] with id = " + equipment_category_id));
 
-        return new ResponseEntity<>(equipmentCategoryRepository.save(entity), HttpStatus.OK);
+            entity.setEquipment_category_name(equipmentCategory.getEquipment_category_name());
+            entity.setEquipment_category_sysname(equipmentCategory.getEquipment_category_sysname());
+
+            equipmentCategoryRepository.save(entity);
+
+            return new ResponseEntity<>(entity, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @DeleteMapping("/equipment-category/{equipment_category_id}")
     public ResponseEntity<HttpStatus> deleteEquipmentCategory(@PathVariable("equipment_category_id") Integer equipment_category_id) {
-        equipmentCategoryRepository.deleteById(equipment_category_id);
 
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        try {
+            equipmentCategoryRepository.findById(equipment_category_id)
+                    .orElseThrow(() -> new Exception("Not found [equipment_category] with id = " + equipment_category_id));
+
+            equipmentCategoryRepository.deleteById(equipment_category_id);
+
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

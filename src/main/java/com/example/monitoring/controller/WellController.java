@@ -30,109 +30,135 @@ public class WellController {
     @GetMapping("/well")
     public ResponseEntity<List<Well>> getListWell(@RequestParam(required = false) String well_name,
                                                   @RequestParam(required = false) Integer company_id,
-                                                  @RequestParam(required = false) Integer well_state_id) throws Exception {
+                                                  @RequestParam(required = false) Integer well_state_id) {
 
-        List<Well> wells = new ArrayList<>();
+        try {
+            List<Well> wells = new ArrayList<>();
 
-        Company company;
-        WellState wellState;
+            Company company;
+            WellState wellState;
 
-        if (well_name != null) {
-            wells.addAll(wellRepository.findByWell_name(well_name));
+            if (well_name == null && company_id == null && well_state_id == null) {
+                wells.addAll(wellRepository.findAll());
+            }
+
+            if (well_name != null) {
+                wells.addAll(wellRepository.findByWell_name(well_name));
+            }
+
+            if (company_id != null) {
+                company = companyRepository.findById(company_id)
+                        .orElseThrow(() -> new Exception("Not found [company] with id = " + company_id));
+                wells.addAll(wellRepository.findByCompany(company));
+            }
+
+            if (well_state_id != null) {
+                wellState = wellStateRepository.findById(well_state_id)
+                        .orElseThrow(() -> new Exception("Not found [well_state] with id = " + well_state_id));
+                wells.addAll(wellRepository.findByWellState(wellState));
+            }
+
+            if (wells.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
             return new ResponseEntity<>(wells, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        if (company_id != null) {
-            company = companyRepository.findById(company_id)
-                    .orElseThrow(() -> new Exception("Not found [company] with id = " + company_id));
-            wells.addAll(wellRepository.findByCompany(company));
-            return new ResponseEntity<>(wells, HttpStatus.OK);
-        }
-
-        if (well_state_id != null) {
-            wellState = wellStateRepository.findById(well_state_id)
-                    .orElseThrow(() -> new Exception("Not found [well_state] with id = " + well_state_id));
-            wells.addAll(wellRepository.findByWellState(wellState));
-            return new ResponseEntity<>(wells, HttpStatus.OK);
-        }
-
-        if (well_name == null && company_id == null && well_state_id == null) {
-            wells.addAll(wellRepository.findAll());
-            return new ResponseEntity<>(wells, HttpStatus.OK);
-        }
-
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/well/{well_id}")
-    public ResponseEntity<Well> getWellById(@PathVariable("well_id") Integer well_id) throws Exception {
-        Well well = wellRepository.findById(well_id)
-                .orElseThrow(() -> new Exception("Not found [well] with id = " + well_id));
-        return new ResponseEntity<>(well, HttpStatus.OK);
+    public ResponseEntity<Well> getWellById(@PathVariable("well_id") Integer well_id) {
+
+        try {
+            Well well = wellRepository.findById(well_id)
+                    .orElseThrow(() -> new Exception("Not found [well] with id = " + well_id));
+
+            return new ResponseEntity<>(well, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/well")
     public ResponseEntity<Well> createWell(@RequestParam Integer company_id,
                                            @RequestParam Integer well_state_id,
-                                           @RequestBody Well well) throws Exception {
+                                           @RequestBody Well well) {
 
-        Date date = new Date();
+        try {
+            Date date = new Date();
 
-        Company company = companyRepository.findById(company_id)
-                .orElseThrow(() -> new Exception("Not found [company] with id = " + company_id));
+            Company company = companyRepository.findById(company_id)
+                    .orElseThrow(() -> new Exception("Not found [company] with id = " + company_id));
 
-        WellState wellState = wellStateRepository.findById(well_state_id)
-                .orElseThrow(() -> new Exception("Not found [well_state] with id = " + well_state_id));
+            WellState wellState = wellStateRepository.findById(well_state_id)
+                    .orElseThrow(() -> new Exception("Not found [well_state] with id = " + well_state_id));
 
-        well.setCompany(company);
-        well.setWellState((wellState));
-        well.setDate_entry(date);
+            well.setCompany(company);
+            well.setWellState((wellState));
+            well.setDate_entry(date);
 
-        wellRepository.save(well);
+            wellRepository.save(well);
 
-        return new ResponseEntity<>(well, HttpStatus.CREATED);
+            return new ResponseEntity<>(well, HttpStatus.CREATED);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping("/well/{well_id}")
     public ResponseEntity<Well> updateWell(@PathVariable("well_id") Integer well_id,
                                            @RequestParam(required = false) Integer company_id,
                                            @RequestParam(required = false) Integer well_state_id,
-                                           @RequestBody(required = false) Well well) throws Exception {
-        Date date = new Date();
+                                           @RequestBody(required = false) Well well) {
 
-        Company company;
-        WellState wellState;
+        try {
+            Date date = new Date();
 
-        Well entity = wellRepository.findById(well_id)
-                .orElseThrow(() -> new Exception("Not found [well] with id = " + well_id));
+            Company company;
+            WellState wellState;
 
-        if (company_id != null) {
-            company = companyRepository.findById(company_id)
-                    .orElseThrow(() -> new Exception("Not found [company] with id = " + company_id));
-            entity.setCompany(company);
+            Well entity = wellRepository.findById(well_id)
+                    .orElseThrow(() -> new Exception("Not found [well] with id = " + well_id));
+
+            if (company_id != null) {
+                company = companyRepository.findById(company_id)
+                        .orElseThrow(() -> new Exception("Not found [company] with id = " + company_id));
+                entity.setCompany(company);
+            }
+
+            if (well_state_id != null) {
+                wellState = wellStateRepository.findById(well_state_id)
+                        .orElseThrow(() -> new Exception("Not found [well_state] with id = " + well_state_id));
+                entity.setWellState(wellState);
+            }
+
+            if (well != null) {
+                entity.setWell_name(well.getWell_name());
+                entity.setDate_entry(date);
+            }
+
+            wellRepository.save(entity);
+
+            return new ResponseEntity<>(entity, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        if (well_state_id != null) {
-            wellState = wellStateRepository.findById(well_state_id)
-                    .orElseThrow(() -> new Exception("Not found [well_state] with id = " + well_state_id));
-            entity.setWellState(wellState);
-        }
-
-        if (well != null) {
-            entity.setWell_name(well.getWell_name());
-            entity.setDate_entry(date);
-        }
-
-        wellRepository.save(entity);
-
-        return new ResponseEntity<>(entity, HttpStatus.OK);
     }
 
     @DeleteMapping("/well/{well_id}")
     public ResponseEntity<Well> deleteEquipment(@PathVariable("well_id") Integer well_id) {
 
-        wellRepository.deleteById(well_id);
+        try {
+            wellRepository.findById(well_id)
+                    .orElseThrow(() -> new Exception("Not found [well] with id = " + well_id));
 
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            wellRepository.deleteById(well_id);
+
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

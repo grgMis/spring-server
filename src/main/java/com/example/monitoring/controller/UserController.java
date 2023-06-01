@@ -28,92 +28,122 @@ public class UserController {
 
     @GetMapping("/user")
     public ResponseEntity<List<User>> getListUser(@RequestParam(required = false) Integer user_role_id,
-                                                  @RequestParam(required = false) Integer employee_id) throws Exception {
+                                                  @RequestParam(required = false) Integer employee_id) {
 
-        List<User> users = new ArrayList<>();
-        Employee employee;
-        UserRole userRole;
+        try {
+            List<User> users = new ArrayList<>();
+            Employee employee;
+            UserRole userRole;
 
-        if (user_role_id != null) {
-            userRole = userRoleRepository.findById(user_role_id)
-                    .orElseThrow(() -> new Exception("Not found [user_role] with id = " + user_role_id));
-            users.addAll(userRepository.findByUserRole(userRole));
+            if (user_role_id == null && employee_id == null) {
+                users.addAll(userRepository.findAll());
+            }
+
+            if (user_role_id != null) {
+                userRole = userRoleRepository.findById(user_role_id)
+                        .orElseThrow(() -> new Exception("Not found [user_role] with id = " + user_role_id));
+                users.addAll(userRepository.findByUserRole(userRole));
+            }
+
+            if (employee_id != null) {
+                employee = employeeRepository.findById(employee_id)
+                        .orElseThrow(() -> new Exception("Not found [employee] with id = " + employee_id));
+                users.addAll(userRepository.findByEmployee(employee));
+            }
+
+            if (users.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            return new ResponseEntity<>(users, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        if (employee_id != null) {
-            employee = employeeRepository.findById(employee_id)
-                    .orElseThrow(() -> new Exception("Not found [employee] with id = " + employee_id));
-            users.addAll(userRepository.findByEmployee(employee));
-        }
-
-        if (user_role_id == null && employee_id == null) {
-            users.addAll(userRepository.findAll());
-        }
-
-        if (users.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-
-        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @GetMapping("/user/{user_id}")
-    public ResponseEntity<User> getUserById(@PathVariable("user_id") Integer user_id) throws Exception {
-        User user = userRepository.findById(user_id)
-                .orElseThrow(() -> new Exception("Not found [user] with id = " + user_id));
-        return new ResponseEntity<>(user, HttpStatus.OK);
+    public ResponseEntity<User> getUserById(@PathVariable("user_id") Integer user_id) {
+
+        try {
+            User user = userRepository.findById(user_id)
+                    .orElseThrow(() -> new Exception("Not found [user] with id = " + user_id));
+
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/user")
     public ResponseEntity<User> createUser(@RequestParam Integer user_role_id,
                                            @RequestParam Integer employee_id,
-                                           @RequestBody User user) throws Exception {
-        UserRole userRole = userRoleRepository.findById(user_role_id)
-                .orElseThrow(() -> new Exception("Not found [user_role] with id = " + user_role_id));
+                                           @RequestBody User user) {
 
-        Employee employee = employeeRepository.findById(employee_id)
-                .orElseThrow(() -> new Exception("Not found [employee] with id = " + employee_id));
+        try {
+            UserRole userRole = userRoleRepository.findById(user_role_id)
+                    .orElseThrow(() -> new Exception("Not found [user_role] with id = " + user_role_id));
 
-        user.setUserRole(userRole);
-        user.setEmployee(employee);
+            Employee employee = employeeRepository.findById(employee_id)
+                    .orElseThrow(() -> new Exception("Not found [employee] with id = " + employee_id));
 
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+            user.setUserRole(userRole);
+            user.setEmployee(employee);
+
+            return new ResponseEntity<>(user, HttpStatus.CREATED);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping("/user/{user_id}")
     public ResponseEntity<User> updateUser(@PathVariable("user_id") Integer user_id,
                                            @RequestParam(required = false) Integer user_role_id,
                                            @RequestParam(required = false) Integer employee_id,
-                                           @RequestBody User user) throws Exception {
-        User entity;
+                                           @RequestBody User user) {
 
-        entity = userRepository.findById(user_id)
-                .orElseThrow(() -> new Exception("Not found [user] with id = " + user_id));
+        try {
+            User entity;
 
-        if (user_role_id != null) {
-            UserRole userRole = userRoleRepository.findById(user_role_id)
-                    .orElseThrow(() -> new Exception("Not found [user_role_id] with id = " + user_role_id));
+            entity = userRepository.findById(user_id)
+                    .orElseThrow(() -> new Exception("Not found [user] with id = " + user_id));
 
-            entity.setUserRole(userRole);
+            if (user_role_id != null) {
+                UserRole userRole = userRoleRepository.findById(user_role_id)
+                        .orElseThrow(() -> new Exception("Not found [user_role_id] with id = " + user_role_id));
+
+                entity.setUserRole(userRole);
+            }
+
+            if (employee_id != null) {
+                Employee employee = employeeRepository.findById(employee_id)
+                        .orElseThrow(() -> new Exception("Not found [employee] with id = " + employee_id));
+
+                entity.setEmployee(employee);
+            }
+
+            entity.setUser_login(user.getUser_login());
+            entity.setUser_password(user.getUser_password());
+
+            userRepository.save(entity);
+
+            return new ResponseEntity<>(entity, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        if (employee_id != null) {
-            Employee employee = employeeRepository.findById(employee_id)
-                    .orElseThrow(() -> new Exception("Not found [employee] with id = " + employee_id));
-
-            entity.setEmployee(employee);
-        }
-
-        entity.setUser_login(user.getUser_login());
-        entity.setUser_password(user.getUser_password());
-
-        return new ResponseEntity<>(userRepository.save(entity), HttpStatus.OK);
     }
 
     @DeleteMapping("/user/{user_id}")
     public ResponseEntity<User> deleteUser(@PathVariable("user_id") Integer user_id) {
-        userRepository.deleteById(user_id);
 
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        try {
+            userRepository.findById(user_id)
+                    .orElseThrow(() -> new Exception("Not found [user] with id = " + user_id));
+
+            userRepository.deleteById(user_id);
+
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

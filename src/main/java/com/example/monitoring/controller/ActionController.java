@@ -35,56 +35,66 @@ public class ActionController {
     public ResponseEntity<List<Action>> getActionList(@RequestParam(required = false) Integer well_id,
                                                       @RequestParam(required = false) Integer user_id,
                                                       @RequestParam(required = false) Integer action_type_id,
-                                                      @RequestParam(required = false) Integer action_state_id) throws Exception {
+                                                      @RequestParam(required = false) Integer action_state_id) {
 
-        List<Action> actions = new ArrayList<>();
+        try {
+            List<Action> actions = new ArrayList<>();
 
-        Well well;
-        User user;
-        ActionType actionType;
-        ActionState actionState;
+            Well well;
+            User user;
+            ActionType actionType;
+            ActionState actionState;
 
-        if (well_id != null) {
-            well = wellRepository.findById(well_id)
-                    .orElseThrow(() -> new Exception("Not found [well] with id = " + well_id));
-            actions.addAll(actionRepository.findByWell(well));
+            if (well_id == null && user_id == null && action_type_id == null && action_state_id == null) {
+                actions.addAll(actionRepository.findAll());
+            }
+
+            if (well_id != null) {
+                well = wellRepository.findById(well_id)
+                        .orElseThrow(() -> new Exception("Not found [well] with id = " + well_id));
+                actions.addAll(actionRepository.findByWell(well));
+            }
+
+            if (user_id != null) {
+                user = userRepository.findById(user_id)
+                        .orElseThrow(() -> new Exception("Not found [user] with id = " + user_id));
+                actions.addAll(actionRepository.findByUser(user));
+            }
+
+            if (action_type_id != null) {
+                actionType = actionTypeRepository.findById(action_type_id)
+                        .orElseThrow(() -> new Exception("Not found [action_type] with id = " + action_type_id));
+                actions.addAll(actionRepository.findByActionType(actionType));
+            }
+
+            if (action_state_id != null) {
+                actionState = actionStateRepository.findById(action_state_id)
+                        .orElseThrow(() -> new Exception("Not found [action_state] with id = " + action_state_id));
+                actions.addAll(actionRepository.findByActionState(actionState));
+                return new ResponseEntity<>(actions, HttpStatus.OK);
+            }
+
+            if (actions.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
             return new ResponseEntity<>(actions, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        if (user_id != null) {
-            user = userRepository.findById(user_id)
-                    .orElseThrow(() -> new Exception("Not found [user] with id = " + user_id));
-            actions.addAll(actionRepository.findByUser(user));
-            return new ResponseEntity<>(actions, HttpStatus.OK);
-        }
-
-        if (action_type_id != null) {
-            actionType = actionTypeRepository.findById(action_type_id)
-                    .orElseThrow(() -> new Exception("Not found [action_type] with id = " + action_type_id));
-            actions.addAll(actionRepository.findByActionType(actionType));
-            return new ResponseEntity<>(actions, HttpStatus.OK);
-        }
-
-        if (action_state_id != null) {
-            actionState = actionStateRepository.findById(action_state_id)
-                    .orElseThrow(() -> new Exception("Not found [action_state] with id = " + action_state_id));
-            actions.addAll(actionRepository.findByActionState(actionState));
-            return new ResponseEntity<>(actions, HttpStatus.OK);
-        }
-
-        if (well_id == null && action_type_id == null && action_state_id == null) {
-            actions.addAll(actionRepository.findAll());
-            return new ResponseEntity<>(actions, HttpStatus.OK);
-        }
-
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/action/{action_id}")
-    public ResponseEntity<Action> getActionById(@PathVariable("action_id") Integer action_id) throws Exception {
-        Action action = actionRepository.findById(action_id)
-                .orElseThrow(() -> new Exception("Not found [action] with id = " + action_id));
-        return new ResponseEntity<>(action, HttpStatus.OK);
+    public ResponseEntity<Action> getActionById(@PathVariable("action_id") Integer action_id) {
+
+        try {
+            Action action = actionRepository.findById(action_id)
+                    .orElseThrow(() -> new Exception("Not found [action] with id = " + action_id));
+
+            return new ResponseEntity<>(action, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/action")
@@ -92,38 +102,42 @@ public class ActionController {
                                                @RequestParam Integer user_id,
                                                @RequestParam Integer action_type_id,
                                                @RequestParam Integer action_state_id,
-                                               @RequestBody(required = false) Action action) throws Exception {
+                                               @RequestBody(required = false) Action action) {
 
-        Date date = new Date();
-        Action entity = new Action();
+        try {
+            Date date = new Date();
+            Action entity = new Action();
 
-        Well well = wellRepository.findById(well_id)
-                .orElseThrow(() -> new Exception("Not found [well] with id = " + well_id));
+            Well well = wellRepository.findById(well_id)
+                    .orElseThrow(() -> new Exception("Not found [well] with id = " + well_id));
 
-        User user = userRepository.findById(user_id)
-                .orElseThrow(() -> new Exception("Not found [user] with id = " + user_id));
+            User user = userRepository.findById(user_id)
+                    .orElseThrow(() -> new Exception("Not found [user] with id = " + user_id));
 
-        ActionType actionType = actionTypeRepository.findById(action_type_id)
-                .orElseThrow(() -> new Exception("Not found [action_type] with id = " + action_type_id));
+            ActionType actionType = actionTypeRepository.findById(action_type_id)
+                    .orElseThrow(() -> new Exception("Not found [action_type] with id = " + action_type_id));
 
-        ActionState actionState = actionStateRepository.findById(action_state_id)
-                .orElseThrow(() -> new Exception("Not found [action_state] with id = " + action_state_id));
+            ActionState actionState = actionStateRepository.findById(action_state_id)
+                    .orElseThrow(() -> new Exception("Not found [action_state] with id = " + action_state_id));
 
-        entity.setWell(well);
-        entity.setUser(user);
-        entity.setActionType(actionType);
-        entity.setActionState(actionState);
+            entity.setWell(well);
+            entity.setUser(user);
+            entity.setActionType(actionType);
+            entity.setActionState(actionState);
 
-        if (action != null) {
-            entity.setDate_entry(date);
-            entity.setDate_begin(action.getDate_begin());
-            entity.setDate_end(action.getDate_end());
-            entity.setAction_note(action.getAction_note());
+            if (action != null) {
+                entity.setDate_entry(date);
+                entity.setDate_begin(action.getDate_begin());
+                entity.setDate_end(action.getDate_end());
+                entity.setAction_note(action.getAction_note());
+            }
+
+            actionRepository.save(entity);
+
+            return new ResponseEntity<>(entity, HttpStatus.CREATED);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        actionRepository.save(entity);
-
-        return new ResponseEntity<>(entity, HttpStatus.CREATED);
     }
 
     @PutMapping("/action/{action_id}")
@@ -132,56 +146,67 @@ public class ActionController {
                                                @RequestParam(required = false) Integer user_id,
                                                @RequestParam(required = false) Integer action_type_id,
                                                @RequestParam(required = false) Integer action_state_id,
-                                               @RequestBody(required = false) Action action) throws Exception {
+                                               @RequestBody(required = false) Action action) {
 
-        Well well;
-        User user;
-        ActionType actionType;
-        ActionState actionState;
+        try {
+            Well well;
+            User user;
+            ActionType actionType;
+            ActionState actionState;
 
-        Action entity = actionRepository.findById(action_id)
-                .orElseThrow(() -> new Exception("Not found [action] with id = " + action_id));
+            Action entity = actionRepository.findById(action_id)
+                    .orElseThrow(() -> new Exception("Not found [action] with id = " + action_id));
 
-        if (well_id != null) {
-            well = wellRepository.findById(well_id)
-                    .orElseThrow(() -> new Exception("Not found [well] with id = " + well_id));
-            entity.setWell(well);
+            if (well_id != null) {
+                well = wellRepository.findById(well_id)
+                        .orElseThrow(() -> new Exception("Not found [well] with id = " + well_id));
+                entity.setWell(well);
+            }
+
+            if (user_id != null) {
+                user = userRepository.findById(user_id)
+                        .orElseThrow(() -> new Exception("Not found [user] with id = " + user_id));
+                entity.setUser(user);
+            }
+
+            if (action_type_id != null) {
+                actionType = actionTypeRepository.findById(action_type_id)
+                        .orElseThrow(() -> new Exception("Not found [action_type] with id = " + action_type_id));
+                entity.setActionType(actionType);
+            }
+
+            if (action_state_id != null) {
+                actionState = actionStateRepository.findById(action_state_id)
+                        .orElseThrow(() -> new Exception("Not found [action_state] with id = " + action_state_id));
+                entity.setActionState(actionState);
+            }
+
+            if (action != null) {
+                entity.setDate_begin(action.getDate_begin());
+                entity.setDate_end(action.getDate_end());
+                entity.setAction_note(action.getAction_note());
+            }
+
+            actionRepository.save(entity);
+
+            return new ResponseEntity<>(entity, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        if (user_id != null) {
-            user = userRepository.findById(user_id)
-                    .orElseThrow(() -> new Exception("Not found [user] with id = " + user_id));
-            entity.setUser(user);
-        }
-
-        if (action_type_id != null) {
-            actionType = actionTypeRepository.findById(action_type_id)
-                    .orElseThrow(() -> new Exception("Not found [action_type] with id = " + action_type_id));
-            entity.setActionType(actionType);
-        }
-
-        if (action_state_id != null) {
-            actionState = actionStateRepository.findById(action_state_id)
-                    .orElseThrow(() -> new Exception("Not found [action_state] with id = " + action_state_id));
-            entity.setActionState(actionState);
-        }
-
-        if (action != null) {
-            entity.setDate_begin(action.getDate_begin());
-            entity.setDate_end(action.getDate_end());
-            entity.setAction_note(action.getAction_note());
-        }
-
-        actionRepository.save(entity);
-
-        return new ResponseEntity<>(entity, HttpStatus.OK);
     }
 
     @DeleteMapping("/action/{action_id}")
     public ResponseEntity<Action> deleteAction(@PathVariable("action_id") Integer action_id) {
 
-        actionRepository.deleteById(action_id);
+        try {
+            actionRepository.findById(action_id)
+                    .orElseThrow(() -> new Exception("Not found [action] with id = " + action_id));
 
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            actionRepository.deleteById(action_id);
+
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
