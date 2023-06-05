@@ -20,8 +20,6 @@ public class Company {
     private String company_name;
 
     @Column(name = "date_entry", nullable = false)
-    @DateTimeFormat(pattern = "dd/MM/yyyy")
-    @JsonFormat(pattern = "dd-MM-yyyy", shape = JsonFormat.Shape.STRING)
     private Date date_entry;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)

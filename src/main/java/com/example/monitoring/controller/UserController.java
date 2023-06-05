@@ -1,6 +1,7 @@
 package com.example.monitoring.controller;
 
 import com.example.monitoring.model.*;
+import com.example.monitoring.repository.EmployeePostRepository;
 import com.example.monitoring.repository.EmployeeRepository;
 import com.example.monitoring.repository.UserRepository;
 import com.example.monitoring.repository.UserRoleRepository;
@@ -26,16 +27,21 @@ public class UserController {
     @Autowired
     private EmployeeRepository employeeRepository;
 
+    @Autowired
+    private EmployeePostRepository employeePostRepository;
+
     @GetMapping("/user")
     public ResponseEntity<List<User>> getListUser(@RequestParam(required = false) Integer user_role_id,
-                                                  @RequestParam(required = false) Integer employee_id) {
+                                                  @RequestParam(required = false) Integer employee_id,
+                                                  @RequestParam(required = false) Integer employee_post_id) {
 
         try {
             List<User> users = new ArrayList<>();
             Employee employee;
             UserRole userRole;
+            EmployeePost employeePost;
 
-            if (user_role_id == null && employee_id == null) {
+            if (user_role_id == null && employee_id == null && employee_post_id == null) {
                 users.addAll(userRepository.findAll());
             }
 
@@ -50,12 +56,30 @@ public class UserController {
                         .orElseThrow(() -> new Exception("Not found [employee] with id = " + employee_id));
                 users.addAll(userRepository.findByEmployee(employee));
             }
+            if (employee_post_id != null) {
+                employeePost = employeePostRepository.findById(employee_post_id)
+                        .orElseThrow(() -> new Exception("Not found [employee_post] with id = " + employee_post_id));
+                users.addAll(userRepository.findByEmployee_EmployeePost(employeePost));
+            }
 
             if (users.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
 
             return new ResponseEntity<>(users, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/user/auth")
+    public ResponseEntity<User> getUserByLogin(@RequestParam String user_login) {
+        try {
+            User user;
+
+            user = userRepository.findByUser_login(user_login);
+
+            return new ResponseEntity<>(user, HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }

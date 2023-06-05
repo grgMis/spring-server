@@ -114,7 +114,6 @@ public class WellController {
                                            @RequestBody(required = false) Well well) {
 
         try {
-            Date date = new Date();
 
             Company company;
             WellState wellState;
@@ -136,7 +135,6 @@ public class WellController {
 
             if (well != null) {
                 entity.setWell_name(well.getWell_name());
-                entity.setDate_entry(date);
             }
 
             wellRepository.save(entity);

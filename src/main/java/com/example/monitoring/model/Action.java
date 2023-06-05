@@ -17,18 +17,12 @@ public class Action {
     private Integer action_id;
 
     @Column(name = "date_entry")
-    @DateTimeFormat(pattern = "dd.MM.yyy")
-    @JsonFormat(pattern = "dd.MM.yyyy", shape = JsonFormat.Shape.STRING)
     private Date date_entry;
 
     @Column(name = "date_begin")
-    @DateTimeFormat(pattern = "dd.MM.yyyy")
-    @JsonFormat(pattern = "dd.MM.yyyy", shape = JsonFormat.Shape.STRING)
     private Date date_begin;
 
     @Column(name = "date_end")
-    @DateTimeFormat(pattern = "dd.MM.yyyy")
-    @JsonFormat(pattern = "dd.MM.yyyy", shape = JsonFormat.Shape.STRING)
     private Date date_end;
 
     @Column(name = "action_note", length = 300)
