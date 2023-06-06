@@ -68,7 +68,7 @@ public class UserRoleController {
 
     @PutMapping("/user-role/{user_role_id}")
     public ResponseEntity<UserRole> updateUserRole(@PathVariable("user_role_id") Integer user_role_id,
-                                                     @RequestBody UserRole userRole) {
+                                                   @RequestBody UserRole userRole) {
 
         try {
             UserRole entity = userRoleRepository.findById(user_role_id)

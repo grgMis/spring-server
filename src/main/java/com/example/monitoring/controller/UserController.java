@@ -113,6 +113,8 @@ public class UserController {
             user.setUserRole(userRole);
             user.setEmployee(employee);
 
+            userRepository.save(user);
+
             return new ResponseEntity<>(user, HttpStatus.CREATED);
         } catch (Exception ex) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);

@@ -72,6 +72,8 @@ public class EmployeeController {
 
             employee.setEmployeePost(employeePost);
 
+            employeeRepository.save(employee);
+
             return new ResponseEntity<>(employee, HttpStatus.CREATED);
         } catch (Exception ex) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
