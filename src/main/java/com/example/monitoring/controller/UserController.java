@@ -104,6 +104,12 @@ public class UserController {
                                            @RequestBody User user) {
 
         try {
+            String currentUserLogin = user.getUser_login();
+
+            if (userRepository.findByUser_login(currentUserLogin) != null) {
+                throw new Exception("Пользователь с таким логином уже существует");
+            }
+
             UserRole userRole = userRoleRepository.findById(user_role_id)
                     .orElseThrow(() -> new Exception("Not found [user_role] with id = " + user_role_id));
 
